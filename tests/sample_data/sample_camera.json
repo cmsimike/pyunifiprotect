@@ -253,7 +253,8 @@
         "touchFocusX": 1001,
         "touchFocusY": 1001,
         "zoomPosition": 0,
-        "mountPosition": null
+        "mountPosition": null,
+        "isColorNightVisionEnabled": false
     },
     "talkbackSettings": {
         "typeFmt": "aac",

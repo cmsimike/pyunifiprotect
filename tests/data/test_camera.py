@@ -188,6 +188,7 @@ async def test_camera_set_color_night_vision(camera_obj: Optional[Camera], statu
         pytest.skip("No camera_obj obj found")
 
     camera_obj.api.api_request.reset_mock()
+
     camera_obj.feature_flags.hotplug = Hotplug()
     camera_obj.feature_flags.hotplug.extender = HotplugExtender()
     camera_obj.feature_flags.hotplug.extender.is_attached = True
