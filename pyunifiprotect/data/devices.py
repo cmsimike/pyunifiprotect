@@ -1310,6 +1310,14 @@ class Camera(ProtectMotionDeviceModel):
     def has_mic(self) -> bool:
         return self.feature_flags.has_mic or self.has_removable_speaker
 
+    @property
+    def has_color_night_vision(self) -> bool:
+        return (
+            self.feature_flags.hotplug
+            and self.feature_flags.hotplug.extender
+            and self.feature_flags.hotplug.extender.is_attached
+        )
+
     def set_ring_timeout(self) -> None:
         self._last_ring_timeout = utc_now() + EVENT_PING_INTERVAL
         self._event_callback_ping()
@@ -1462,6 +1470,17 @@ class Camera(ProtectMotionDeviceModel):
 
         def callback() -> None:
             self.hdr_mode = enabled
+
+        await self.queue_update(callback)
+
+    async def set_color_night_vision(self, enabled: bool) -> None:
+        """Sets Color Night Vision on camera"""
+
+        if not self.has_color_night_vision:
+            raise BadRequest("Camera does not have Color Night Vision")
+
+        def callback() -> None:
+            self.isp_settings.is_color_night_vision_enabled = enabled
 
         await self.queue_update(callback)
 
