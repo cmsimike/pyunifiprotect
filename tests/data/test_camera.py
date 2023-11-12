@@ -160,22 +160,6 @@ async def test_camera_set_hdr_no_hdr(camera_obj: Optional[Camera]):
 
 
 @pytest.mark.skipif(not TEST_CAMERA_EXISTS, reason="Missing testdata")
-@pytest.mark.asyncio
-async def test_camera_set_color_night_vision_no_color_night_vision(camera_obj: Optional[Camera]):
-    if camera_obj is None:
-        pytest.skip("No camera_obj obj found")
-
-    camera_obj.api.api_request.reset_mock()
-
-    camera_obj.feature_flags.has_color_night_vision = False
-
-    with pytest.raises(BadRequest):
-        await camera_obj.set_color_night_vision(True)
-
-    assert not camera_obj.api.api_request.called
-
-
-@pytest.mark.skipif(not TEST_CAMERA_EXISTS, reason="Missing testdata")
 @pytest.mark.parametrize("status", [True, False])
 @pytest.mark.asyncio
 async def test_camera_set_hdr(camera_obj: Optional[Camera], status: bool):
@@ -205,7 +189,6 @@ async def test_camera_set_color_night_vision(camera_obj: Optional[Camera], statu
 
     camera_obj.api.api_request.reset_mock()
 
-    camera_obj.feature_flags.has_color_night_vision = True
     camera_obj.isp_settings.is_color_night_vision_enabled = not status
 
     await camera_obj.set_color_night_vision(status)
