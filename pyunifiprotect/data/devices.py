@@ -719,6 +719,7 @@ class CameraFeatureFlags(ProtectBaseObject):
     is_doorbell: bool
     # 2.8.22+
     lens_model: Optional[str] = None
+    has_color_night_vision: Optional[bool] = None
     # 2.9.20+
     has_color_lcd_screen: Optional[bool] = None
     has_line_crossing: Optional[bool] = None
@@ -1462,6 +1463,17 @@ class Camera(ProtectMotionDeviceModel):
 
         def callback() -> None:
             self.hdr_mode = enabled
+
+        await self.queue_update(callback)
+
+    async def set_color_night_vision(self, enabled: bool) -> None:
+        """Sets Color Night Vision on camera"""
+
+        if not self.feature_flags.has_color_night_vision:
+            raise BadRequest("Camera does not have Color Night Vision")
+
+        def callback() -> None:
+            self.isp_settings.is_color_night_vision_enabled = enabled
 
         await self.queue_update(callback)
 
