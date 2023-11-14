@@ -1,9 +1,8 @@
-# type: ignore
-# pylint: disable=protected-access
+# mypy: disable-error-code="attr-defined, dict-item, assignment, union-attr, arg-type"
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from unittest.mock import Mock, patch
 
@@ -27,7 +26,7 @@ from tests.conftest import TEST_CAMERA_EXISTS
 try:
     from pydantic.v1 import ValidationError
 except ImportError:
-    from pydantic import ValidationError  # type: ignore
+    from pydantic import ValidationError
 
 
 @pytest.mark.skipif(not TEST_CAMERA_EXISTS, reason="Missing testdata")
@@ -308,10 +307,9 @@ async def test_camera_set_camera_zoom(camera_obj: Optional[Camera], level: int):
     camera_obj.feature_flags.can_optical_zoom = True
     camera_obj.isp_settings.zoom_position = 10
 
-    if level in (-1, 200):
+    if level in {-1, 200}:
         with pytest.raises(ValidationError):
             await camera_obj.set_camera_zoom(level)
-
         assert not camera_obj.api.api_request.called
     else:
         await camera_obj.set_camera_zoom(level)
@@ -335,11 +333,10 @@ async def test_camera_set_wdr_level(camera_obj: Optional[Camera], level: int):
     camera_obj.feature_flags.has_hdr = False
     camera_obj.isp_settings.wdr = 2
 
-    if level in (-1, 4):
+    if level in {-1, 4}:
         with pytest.raises(ValidationError):
             await camera_obj.set_wdr_level(level)
-
-            assert not camera_obj.api.api_request.called
+        assert not camera_obj.api.api_request.called
     else:
         await camera_obj.set_wdr_level(level)
 
@@ -394,10 +391,9 @@ async def test_camera_set_mic_volume(camera_obj: Optional[Camera], level: int):
     camera_obj.feature_flags.has_mic = True
     camera_obj.mic_volume = 10
 
-    if level in (-1, 200):
+    if level in {-1, 200}:
         with pytest.raises(ValidationError):
             await camera_obj.set_mic_volume(level)
-
         assert not camera_obj.api.api_request.called
     else:
         await camera_obj.set_mic_volume(level)
@@ -437,10 +433,9 @@ async def test_camera_set_speaker_volume(camera_obj: Optional[Camera], level: in
     camera_obj.feature_flags.has_speaker = True
     camera_obj.speaker_settings.volume = 10
 
-    if level in (-1, 200):
+    if level in {-1, 200}:
         with pytest.raises(ValidationError):
             await camera_obj.set_speaker_volume(level)
-
         assert not camera_obj.api.api_request.called
     else:
         await camera_obj.set_speaker_volume(level)
@@ -484,7 +479,7 @@ async def test_camera_set_chime_duration_duration(
     camera_obj.chime_duration = 300
     camera_obj.mic_volume = 10
 
-    if duration in (-1, 20):
+    if duration in {-1, 20}:
         with pytest.raises(BadRequest):
             await camera_obj.set_chime_duration(duration)
 
@@ -680,7 +675,7 @@ async def test_camera_set_lcd_text_custom(camera_obj: Optional[Camera]):
         reset_at=None,
     )
 
-    now = datetime.now(tz=UTC)
+    now = datetime.now(tz=timezone.utc)
     await camera_obj.set_lcd_text(DoorbellMessageType.CUSTOM_MESSAGE, "Test", now)
 
     camera_obj.api.api_request.assert_called_with(
@@ -708,7 +703,7 @@ async def test_camera_set_lcd_text_custom_to_custom(camera_obj: Optional[Camera]
         reset_at=None,
     )
 
-    now = datetime.now(tz=UTC)
+    now = datetime.now(tz=timezone.utc)
     await camera_obj.set_lcd_text(DoorbellMessageType.CUSTOM_MESSAGE, "Test", now)
 
     camera_obj.api.api_request.assert_called_with(
@@ -891,7 +886,7 @@ async def test_camera_set_privacy_no_privacy(camera_obj: Optional[Camera]):
 @pytest.mark.parametrize("level", [None, -1, 0, 100, 200])
 @pytest.mark.parametrize("mode", [None, RecordingMode.ALWAYS])
 @pytest.mark.asyncio()
-async def test_camera_set_privacy(
+async def test_camera_set_privacy(  # noqa: PLR0912
     camera_obj: Optional[Camera],
     actual_enabled: bool,
     enabled: bool,
@@ -910,10 +905,9 @@ async def test_camera_set_privacy(
     camera_obj.mic_volume = 10
     camera_obj.recording_settings.mode = RecordingMode.NEVER
 
-    if level in (-1, 200):
+    if level in {-1, 200}:
         with pytest.raises(ValidationError):
             await camera_obj.set_privacy(enabled, level, mode)
-
         assert not camera_obj.api.api_request.called
     else:
         expected = {}

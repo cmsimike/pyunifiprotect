@@ -1,11 +1,9 @@
-# pylint: disable=protected-access
-
 from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Coroutine
 from copy import deepcopy
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 import logging
 from pathlib import Path
 from shlex import split
@@ -238,7 +236,7 @@ class SampleDataGenerator:
     ) -> tuple[Optional[dict[str, Any]], Optional[dict[str, Any]]]:
         data = await self.client.get_events_raw()
 
-        self.constants["time"] = datetime.now(tz=UTC).isoformat()
+        self.constants["time"] = datetime.now(tz=timezone.utc).isoformat()
         self.constants["event_count"] = len(data)
 
         motion_event: Optional[dict[str, Any]] = None

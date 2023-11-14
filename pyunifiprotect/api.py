@@ -132,6 +132,7 @@ class BaseApiClient:
     _username: str
     _password: str
     _verify_ssl: bool
+    _ws_timeout: int
 
     _is_authenticated: bool = False
     _last_update: float = NEVER_RAN
@@ -154,6 +155,7 @@ class BaseApiClient:
         password: str,
         verify_ssl: bool = True,
         session: Optional[aiohttp.ClientSession] = None,
+        ws_timeout: int = 30,
     ) -> None:
         self._auth_lock = asyncio.Lock()
         self._host = host
@@ -162,6 +164,7 @@ class BaseApiClient:
         self._username = username
         self._password = password
         self._verify_ssl = verify_ssl
+        self._ws_timeout = ws_timeout
 
         if session is not None:
             self._session = session
@@ -208,7 +211,9 @@ class BaseApiClient:
             return self.headers
 
         if self._websocket is None:
-            self._websocket = Websocket(self.ws_url, _auth, verify=self._verify_ssl)
+            self._websocket = Websocket(
+                self.ws_url, _auth, verify=self._verify_ssl, timeout=self._ws_timeout
+            )
             self._websocket.subscribe(self._process_ws_message)
 
         return self._websocket
@@ -243,9 +248,7 @@ class BaseApiClient:
         for attempt in range(2):
             try:
                 req_context = session.request(method, url, headers=headers, **kwargs)
-                response = (
-                    await req_context.__aenter__()
-                )  # pylint: disable=unnecessary-dunder-call
+                response = await req_context.__aenter__()
 
                 self._update_last_token_cookie(response)
                 if auto_close:
@@ -476,7 +479,10 @@ class BaseApiClient:
 
         if not websocket.is_connected:
             self._last_ws_status = False
-            await websocket.connect()
+            try:
+                await websocket.connect()
+            except (TimeoutError, asyncio.TimeoutError, asyncio.CancelledError):
+                pass
 
     async def async_disconnect_ws(self) -> None:
         """Disconnect from Websocket."""
@@ -558,6 +564,7 @@ class ProtectApiClient(BaseApiClient):
         password: str,
         verify_ssl: bool = True,
         session: Optional[aiohttp.ClientSession] = None,
+        ws_timeout: int = 30,
         override_connection_host: bool = False,
         minimum_score: int = 0,
         subscribed_models: Optional[set[ModelType]] = None,
@@ -573,6 +580,7 @@ class ProtectApiClient(BaseApiClient):
             password=password,
             verify_ssl=verify_ssl,
             session=session,
+            ws_timeout=ws_timeout,
         )
 
         self._minimum_score = minimum_score
@@ -665,7 +673,7 @@ class ProtectApiClient(BaseApiClient):
         for sub in self._ws_subscriptions:
             try:
                 sub(msg)
-            except Exception:  # pylint: disable=broad-except
+            except Exception:
                 _LOGGER.exception("Exception while running subscription handler")
 
     def _get_last_update_id(self) -> Optional[UUID]:
