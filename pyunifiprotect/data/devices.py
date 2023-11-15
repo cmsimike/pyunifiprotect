@@ -1406,10 +1406,11 @@ class Camera(ProtectMotionDeviceModel):
 
     @property
     def has_color_night_vision(self) -> bool:
-        if self.feature_flags.hotplug is not None \
-            and self.feature_flags.hotplug.extender is not None \
-            and self.feature_flags.hotplug.extender.is_attached is not None:
-
+        if (
+            self.feature_flags.hotplug is not None
+            and self.feature_flags.hotplug.extender is not None
+            and self.feature_flags.hotplug.extender.is_attached is not None
+        ):
             return self.feature_flags.hotplug.extender.is_attached
 
         return False

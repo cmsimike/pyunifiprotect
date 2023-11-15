@@ -188,7 +188,8 @@ async def test_camera_set_hdr(camera_obj: Optional[Camera], status: bool):
 @pytest.mark.parametrize("status", [True, False])
 @pytest.mark.asyncio()
 async def test_camera_set_color_night_vision(
-    camera_obj: Optional[Camera], status: bool,
+    camera_obj: Optional[Camera],
+    status: bool,
 ):
     if camera_obj is None:
         pytest.skip("No camera_obj obj found")
