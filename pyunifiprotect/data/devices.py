@@ -1408,8 +1408,8 @@ class Camera(ProtectMotionDeviceModel):
     def has_color_night_vision(self) -> bool:
         if self.feature_flags.hotplug and self.feature_flags.hotplug.extender:
             return self.feature_flags.hotplug.extender.is_attached
-        else:
-            return False
+
+        return False
 
     def set_ring_timeout(self) -> None:
         self._last_ring_timeout = utc_now() + EVENT_PING_INTERVAL
